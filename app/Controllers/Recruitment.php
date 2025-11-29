@@ -2,10 +2,10 @@
 
 namespace App\Controllers;
 
-class Home extends BaseController
+class Recruitment extends BaseController
 {
     public function index(): string
     {
-        return view('layout');
+        return view('Recruitment/index');
     }
 }

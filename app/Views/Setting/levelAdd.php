@@ -1,0 +1,22 @@
+<?= $this->extend('layout') ?>
+
+
+<?= $this->section('content') ?>
+
+<div class="container-fluid">
+    <?php include APPPATH . 'views/utilities/button.php' ?>
+    <form action="#" method="POST">
+    <div class="mb-3">
+        <label for="levelCode" class="form-label">Level Code</label>
+        <input name="levelCode" type="text" class="form-control" id="levelCode" aria-describedby="emailHelp">
+    </div>
+    <div class="mb-3">
+        <label for="levelName" class="form-label">Level Name</label>
+        <input name="levelName" type="text" class="form-control" id="levelName" aria-describedby="emailHelp">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+</div>
+
+<?= $this->endSection() ?>

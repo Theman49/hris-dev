@@ -8,15 +8,21 @@
     $data = $query->getResultArray()[0];
     $allPos = $query2->getResultArray();
     $tableName = 'Position';
+
+    $valueCode = $data['pos_code'];
+    $nameCode = 'posCode'
 ?>
 
 
 <div class="container-fluid">
-    <?php include APPPATH . 'views/utilities/button.php' ?>
-    <form action="#" method="POST">
+    <div class="d-flex justify-content-between">
+        <?php include APPPATH . 'views/utilities/buttonBack.php' ?>
+        <?php include APPPATH . 'views/utilities/buttonDelete.php' ?>
+    </div>
+    <form action="/setting/position/edit" method="POST">
     <div class="mb-3">
         <label for="posCode" class="form-label">Position Code</label>
-        <input name="posCode" value="<?=$data['pos_code']?>" type="text" class="form-control" id="posCode" aria-describedby="emailHelp">
+        <input name="posCode" value="<?=$data['pos_code']?>" type="text" class="form-control" id="posCode" aria-describedby="emailHelp" readonly>
     </div>
     <div class="mb-3">
         <label for="posName" class="form-label">Position Name</label>
@@ -26,7 +32,7 @@
         <label for="parentCode" class="form-label">Parent Code</label><br>
 
         <select value="<?=$data['parent_code']?>" name="parentCode" class="form-control" aria-label="Default select example">
-
+            <option value=""></option>
         <?php
             foreach($allPos as $row){
                 ?>

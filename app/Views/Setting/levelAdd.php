@@ -4,8 +4,8 @@
 <?= $this->section('content') ?>
 
 <div class="container-fluid">
-    <?php include APPPATH . 'views/utilities/button.php' ?>
-    <form action="#" method="POST">
+    <?php include APPPATH . 'views/utilities/buttonBack.php' ?>
+    <form action="/setting/level/add" method="POST">
     <div class="mb-3">
         <label for="levelCode" class="form-label">Level Code</label>
         <input name="levelCode" type="text" class="form-control" id="levelCode" aria-describedby="emailHelp">

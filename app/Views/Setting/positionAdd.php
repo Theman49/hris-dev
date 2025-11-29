@@ -11,8 +11,8 @@
 
 
 <div class="container-fluid">
-    <?php include APPPATH . 'views/utilities/button.php' ?>
-    <form action="#" method="POST">
+    <?php include APPPATH . 'views/utilities/buttonBack.php' ?>
+    <form action="/setting/position/add" method="POST">
     <div class="mb-3">
         <label for="posCode" class="form-label">Position Code</label>
         <input name="posCode" type="text" class="form-control" id="posCode" aria-describedby="emailHelp">

@@ -4,14 +4,22 @@
 <?= $this->section('content') ?>
 <?php
     $data = $query->getResultArray()[0];
+    $tableName = 'level';
+    $idBtnDel = 'btnDelete';
+    $valueCode = $data['level_code'];
+    $nameCode = 'levelCode'
 ?>
 
 <div class="container-fluid">
-    <?php include APPPATH . 'views/utilities/button.php' ?>
-    <form action="#" method="POST">
+    <div class="d-flex justify-content-between">
+        <?php include APPPATH . 'views/utilities/buttonBack.php' ?>
+        <?php include APPPATH . 'views/utilities/buttonDelete.php' ?>
+    </div>
+       
+    <form action="/setting/level/edit" method="POST">
     <div class="mb-3">
         <label for="levelCode" class="form-label">Level Code</label>
-        <input value="<?=$data['level_code']?>" name="levelCode" type="text" class="form-control" id="levelCode" aria-describedby="emailHelp">
+        <input value="<?=$data['level_code']?>" name="levelCode" type="text" class="form-control" id="levelCode" aria-describedby="emailHelp" readonly>
     </div>
     <div class="mb-3">
         <label for="levelName" class="form-label">Level Name</label>
@@ -19,6 +27,7 @@
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
     </form>
+
 
 </div>
 

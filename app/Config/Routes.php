@@ -27,7 +27,15 @@ $routes->get('/leave/request', 'Leave::request');
 $routes->get('/setting/position', 'Setting::position');
 $routes->get('/setting/position/add', 'Setting::positionAdd');
 $routes->get('/setting/position/edit/(:segment)', 'Setting::positionEdit/$1');
+$routes->post('/setting/position/add', 'Setting::positionInsert');
+$routes->post('/setting/position/edit', 'Setting::positionUpdate');
+$routes->post('/setting/position/delete', 'Setting::positionRemove');
+
 $routes->get('/setting/level', 'Setting::level');
 $routes->get('/setting/level/add', 'Setting::levelAdd');
 $routes->get('/setting/level/edit/(:segment)', 'Setting::levelEdit/$1');
+$routes->post('/setting/level/add', 'Setting::levelInsert');
+$routes->post('/setting/level/edit', 'Setting::levelUpdate');
+$routes->post('/setting/level/delete', 'Setting::levelRemove');
+
 $routes->get('/setting/career-type', 'Setting::careerType');

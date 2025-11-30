@@ -1,3 +1,6 @@
+<?php
+    $session = session()->get('data');
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -45,6 +48,10 @@
             <!-- Divider -->
             <hr class="sidebar-divider">
 
+            <?php
+
+                if($session['userLevel'] != 'STF'){
+            ?>
             <!-- Nav Item - Utilities Collapse Menu -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseRecruitment"
@@ -55,11 +62,14 @@
                 <div id="collapseRecruitment" class="collapse" aria-labelledby="headingUtilities"
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="/recruitment/">Request</a>
-                        <a class="collapse-item" href="/recruitment/applicants">Applicants</a>
+                        <a class="collapse-item" href="/recruitment/request">Request</a>
+                        <a class="collapse-item" href="/recruitment/applicant">Applicant</a>
                     </div>
                 </div>
             </li>
+            <?php
+                }
+            ?>
             
             <!-- Nav Item - Utilities Collapse Menu -->
             <li class="nav-item">
@@ -106,6 +116,9 @@
                 </div>
             </li>
 
+            <?php
+                if($session['userLevel'] == 'HR'){
+            ?>
             <!-- Nav Item - Utilities Collapse Menu -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSetting"
@@ -122,6 +135,9 @@
                     </div>
                 </div>
             </li>
+                <?php
+                }
+            ?>
 
 
 
@@ -303,7 +319,7 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Douglas McGee</span>
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?=$session['userFullName']?> (<?=$session['userLevel']?>)</span>
                                 <img class="img-profile rounded-circle"
                                     src="<?=base_url()?>img/undraw_profile.svg">
                             </a>
@@ -323,7 +339,7 @@
                                     Activity Log
                                 </a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                <a class="dropdown-item" href="/logout">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Logout
                                 </a>
@@ -401,6 +417,15 @@
 
     <!-- Page level custom scripts -->
     <script src="<?=base_url()?>js/demo/datatables-demo.js"></script>
+
+    <script>
+        <?php 
+            ob_start() ;
+            var_dump($session);
+            $dumpOutput = ob_get_clean();
+        ?>
+        console.log('<?=json_encode($dumpOutput)?>')
+    </script>
 
 </body>
 

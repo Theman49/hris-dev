@@ -3,10 +3,10 @@
 
 <?= $this->section('content') ?>
 <?php 
-    $header = ['level code', 'level name'];
-    $headerAlias = ['level_code', 'level_name', ];
+    $header = ['level code', 'level name', 'level order'];
+    $headerAlias = ['level_code', 'level_name', 'level_order'];
     $data =  $query->getResultArray(); 
-    $tableName = 'Level'
+    $tableName = 'Setting/Level'
 ?>
 
 <?php include APPPATH . 'views/utilities/tables.php' ?>

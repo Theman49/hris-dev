@@ -1,14 +1,20 @@
  <div class="container-fluid">
 
  <?php
-    $hrefPage = '/setting/' . strtolower($tableName);
+    $hrefPage = strtolower($tableName);
  ?>
 
     <!-- DataTales Example -->
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between">
             <h6 class="m-0 font-weight-bold text-primary"><?=$tableName?></h6>
-            <a class="m-0 font-weight-bold text-primary" href="<?=$hrefPage?>/add">+ Add</a>
+            <?php 
+                if(!isset($hideAdd)) {
+                    ?>
+                        <a class="m-0 font-weight-bold text-primary" href="/<?=$hrefPage?>/add">+ Add</a>
+                    <?php
+                }
+            ?>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -31,8 +37,8 @@
                                         <tr>
                                             <?php
                                                 foreach($headerAlias as $alias){
-                                                    if(str_contains($alias, 'code') && !str_contains($alias, 'parent')){
-                                                        $hrefPage2 =  $hrefPage . "/edit/" . $item[$alias];
+                                                    if(str_contains($alias, 'code') || str_contains($alias, 'emp_id') && !str_contains($alias, 'parent')){
+                                                        $hrefPage2 =  '/' . $hrefPage . "/edit/" . $item[$alias];
                                                         ?>
                                                         <th><a href="<?=$hrefPage2?>"><?=$item[$alias]?></a></th>
                                                         <?php

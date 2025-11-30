@@ -25,6 +25,10 @@
         <label for="levelName" class="form-label">Level Name</label>
         <input value="<?=$data['level_name']?>" name="levelName" type="text" class="form-control" id="levelName" aria-describedby="emailHelp">
     </div>
+    <div class="mb-3">
+        <label for="levelOrder" class="form-label">Level Order</label>
+        <input value="<?=$data['level_order']?>" name="levelOrder" type="text" class="form-control" id="levelOrder" aria-describedby="emailHelp">
+    </div>
     <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 

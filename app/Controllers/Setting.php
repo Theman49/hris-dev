@@ -101,11 +101,13 @@ class Setting extends BaseController
     {
         $newLevelName = $_POST['levelName'];
         $newLevelCode = $_POST['levelCode'];
+        $newLevelOrder = $_POST['levelOrder'];
         $db = db_connect();
         $builder = $db->table('hrmlevel');
         $builder->set([
             'level_code' => $newLevelCode,
             'level_name' => $newLevelName,
+            'level_order' => $newLevelOrder,
         ]);
         $query = $builder->insert();
         if($query){
@@ -125,9 +127,13 @@ class Setting extends BaseController
     public function levelUpdate(): string
     {
         $newLevelName = $_POST['levelName'];
+        $newLevelOrder = $_POST['levelOrder'];
         $db = db_connect();
         $builder = $db->table('hrmlevel');
-        $builder->set('level_name', $newLevelName);
+        $builder->set([
+            'level_name' => $newLevelName,
+            'level_order' => $newLevelOrder,
+        ]);
         $builder->where('level_code', $_POST['levelCode']);
         $query = $builder->update();
         if($query){

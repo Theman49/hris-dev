@@ -3,7 +3,8 @@
  <?= $this->section('content') ?>
     <?php
         $tableName = 'Recruitment/Applicant';
-        $allRecCode = $recCodeAll->getResultArray();
+        // $allRecCode = $recCodeAll->getResultArray();
+        $allRecCode = $result;
         
     ?>
 

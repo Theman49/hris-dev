@@ -63,7 +63,11 @@
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item" href="/recruitment/request">Request</a>
+                        <?php
+                            if(in_array($session['userLevel'], ['SPV', 'MGR'])){
+                        ?>
                         <a class="collapse-item" href="/recruitment/applicant">Applicant</a>
+                        <?php } ?>
                     </div>
                 </div>
             </li>
@@ -319,7 +323,7 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?=$session['userFullName']?> (<?=$session['userLevel']?>)</span>
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?=$session['userFullName']?> (<?=$session['userPosCode']?>-<?=$session['userLevel']?>)</span>
                                 <img class="img-profile rounded-circle"
                                     src="<?=base_url()?>img/undraw_profile.svg">
                             </a>
@@ -364,7 +368,7 @@
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2020</span>
+                        <span>Copyright &copy; HRIS NURDIN 2025</span>
                     </div>
                 </div>
             </footer>

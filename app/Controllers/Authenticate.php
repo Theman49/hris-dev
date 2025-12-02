@@ -21,8 +21,10 @@ class Authenticate extends BaseController
         $db = db_connect();
         $builder = $db->table('hrmuser');
         $builder->join('hrmemployee', 'hrmuser.user_id = hrmemployee.user_id', 'left');
-        $builder->join('hrmlevel', 'hrmemployee.level_code = hrmlevel.level_code', 'left');
+        $builder->join('hrmcareer', 'hrmemployee.emp_id = hrmcareer.emp_id', 'left');
+        $builder->join('hrmlevel', 'hrmcareer.level_code = hrmlevel.level_code', 'left');
         $builder->where('hrmuser.username', $username);
+        $builder->orderBy('hrmcareer.effective_date DESC');
         $query = $builder->get();
         if(!$query){
             echo "<script>alert('login failed')</script>";
@@ -44,6 +46,7 @@ class Authenticate extends BaseController
                 'userFullName' => $data[0]['full_name'],
                 'userEmpId' => $data[0]['emp_id'],
                 'userLevelOrder' => $data[0]['level_order'],
+                'userPosCode' => $data[0]['pos_code'],
                 'isLogin' => 1,
             ];
 

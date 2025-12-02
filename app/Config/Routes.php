@@ -18,10 +18,15 @@ $routes->group('recruitment', ['filter' => 'authfilter'], function($routes){
     $routes->get('request', 'Recruitment::request', ['filter' => 'adminfilter']);
     $routes->get('request/add', 'Recruitment::requestAdd', ['filter' => 'adminfilter']);
     $routes->post('request/add', 'Recruitment::requestSubmit', ['filter' => 'adminfilter']);
+    $routes->get('request/edit/(:segment)', 'Recruitment::requestEdit/$1', ['filter' => 'adminfilter']);
+    $routes->post('request/revise', 'Recruitment::requestRevise', ['filter' => 'adminfilter']);
+    $routes->post('request/approve', 'Recruitment::requestApprove', ['filter' => 'adminfilter']);
 
     $routes->get('applicant', 'Recruitment::applicant', ['filter' => 'adminfilter']);
     $routes->get('applicant/add', 'Recruitment::applicantAdd', ['filter' => 'adminfilter']);
     $routes->post('applicant/add', 'Recruitment::applicantSubmit', ['filter' => 'adminfilter']);
+    $routes->get('applicant/edit/(:segment)', 'Recruitment::applicantEdit/$1', ['filter' => 'adminfilter']);
+    $routes->post('applicant/edit', 'Recruitment::applicantUpdate', ['filter' => 'adminfilter']);
 });
 
 // authenticate
@@ -30,14 +35,18 @@ $routes->post('/login', 'Authenticate::loginSubmit');
 $routes->get('/logout', 'Authenticate::logout');
 
 
-// career
-$routes->get('/career', 'Career::index');
-$routes->get('/career/edit', 'Career::edit');
-
 // employee
 $routes->group('employee', ['filter' => 'authfilter'], function($routes){
     $routes->get('/', 'Employee::information');
     $routes->get('/edit', 'Employee::edit', ['filter' => 'adminfilter']);
+});
+
+// career
+$routes->group('career', ['filter' => 'authfilter'], function($routes){
+    $routes->get('/', 'Career::transition');
+    $routes->get('detail/(:segment)', 'Career::transitionDetail/$1');
+    $routes->get('detail/add/(:segment)', 'Career::transitionDetailAdd/$1', ['filter' => 'adminfilter']);
+    $routes->post('detail/add/', 'Career::transitionDetailSubmit', ['filter' => 'adminfilter']);
 });
 
 // leave

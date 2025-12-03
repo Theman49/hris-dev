@@ -7,6 +7,7 @@
         $tableName = 'Recruitment/Request';
         $allPos = $posAll->getResultArray();
         $allLevel = $levelAll->getResultArray();
+        $backUrl = $tableName;
     ?>
 
     <div class="container-fluid">

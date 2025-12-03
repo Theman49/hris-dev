@@ -2,6 +2,9 @@
 
 
 <?= $this->section('content') ?>
+<?php
+    $backUrl = 'setting/level';
+?>
 
 <div class="container-fluid">
     <?php include APPPATH . 'views/utilities/buttonBack.php' ?>

@@ -8,6 +8,9 @@
     $allPos = $query->getResultArray();
     $tableName = 'Position'
 ?>
+<?php
+    $backUrl = 'setting/position';
+?>
 
 
 <div class="container-fluid">

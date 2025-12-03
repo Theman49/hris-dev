@@ -50,8 +50,17 @@ $routes->group('career', ['filter' => 'authfilter'], function($routes){
 });
 
 // leave
-$routes->get('/leave', 'Leave::index');
-$routes->get('/leave/request', 'Leave::request');
+$routes->group('leave', ['filter' => 'authfilter'], function($routes){
+    $routes->get('/', 'Leave::request');
+    $routes->get('request/add', 'Leave::requestAdd');
+    $routes->get('request/edit/(:segment)', 'Leave::requestEdit/$1');
+    $routes->post('request/add', 'Leave::requestSubmit');
+    $routes->post('request/aprove', 'Leave::requestApprove');
+    $routes->post('request/revise', 'Leave::requestRevise');
+
+    //API
+    $routes->post('balance/get', 'Leave::getBalance');
+});
 
 //setting
 $routes->group('setting', ['filter' => 'authfilter'], function($routes){

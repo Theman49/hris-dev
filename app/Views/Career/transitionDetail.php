@@ -10,9 +10,13 @@
     if($session['userLevelOrder'] == 1){
         $hideAdd = true;
     }
+    $backUrl = 'career';
 ?>
 
-<?php include APPPATH . 'views/utilities/tables.php' ?>
+    <div class="container-fluid">
+        <?php include APPPATH . 'views/utilities/buttonBack.php' ?>
+    </div>
+    <?php include APPPATH . 'views/utilities/tables.php' ?>
 
 
 <?= $this->endSection() ?>

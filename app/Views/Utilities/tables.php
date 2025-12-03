@@ -48,6 +48,7 @@
                                                        || (str_contains(strtolower($tableName), 'recruitment/applicant') && $alias == 'applicant_code') //for applicant page
                                                        || (str_contains(strtolower($tableName), 'recruitment/request') && $alias == 'req_code') //for recruitment request page
                                                        || (str_contains(strtolower($tableName), 'career') && $alias == 'emp_id') //for career transition page
+                                                       || (str_contains(strtolower($tableName), 'leave') && $alias == 'leave_code') //for leave request page
                                                     ){
                                                         $hrefPage2 =  '/' . $hrefPage . "/edit/" . $item[$alias];
                                                         if(str_contains(strtolower($tableName), 'career') && $alias == 'emp_id'){ //for career transition page
@@ -64,6 +65,8 @@
                                                                     echo 'bg-success text-dark';
                                                                 }else if(str_contains($item[$alias], 'revised')){
                                                                     echo 'bg-warning text-dark';
+                                                                }else if(str_contains($item[$alias], 'partially approved')){
+                                                                    echo 'bg-info text-light';
                                                                 }else if(str_contains($item[$alias], 'waiting for approval')){
                                                                     echo 'bg-secondary text-light';
                                                                 }

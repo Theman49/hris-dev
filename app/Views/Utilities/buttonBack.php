@@ -1,1 +1,1 @@
-<button type="button" class="btn btn-secondary mb-3" onclick="history.go(-1)">&larr; Back</button>
+<button type="button" class="btn btn-secondary mb-3" onclick="window.location.href='<?=base_url(strtolower($backUrl))?>'">&larr; Back</button>

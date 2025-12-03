@@ -8,6 +8,7 @@
     $levelAll = $level->getResultArray();
     $careerTypeAll = $careerType->getResultArray();
     $tableName = 'Career/Detail';
+    $backUrl = 'career/detail/'. $empId;
 ?>
 
  <div class="container-fluid">

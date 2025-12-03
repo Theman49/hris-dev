@@ -12,6 +12,9 @@
     $valueCode = $data['pos_code'];
     $nameCode = 'posCode'
 ?>
+<?php
+    $backUrl = 'setting/position';
+?>
 
 
 <div class="container-fluid">

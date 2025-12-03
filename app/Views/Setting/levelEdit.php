@@ -9,6 +9,9 @@
     $valueCode = $data['level_code'];
     $nameCode = 'levelCode'
 ?>
+<?php
+    $backUrl = 'setting/level';
+?>
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between">

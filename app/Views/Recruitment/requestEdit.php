@@ -9,6 +9,7 @@
         $allPos = $posAll->getResultArray();
         $allLevel = $levelAll->getResultArray();
         $data = $query->getResultArray()[0];
+        $backUrl = $tableName;
     ?>
 
     <?php if($session['userLevelOrder'] == 4){

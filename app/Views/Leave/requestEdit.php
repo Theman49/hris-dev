@@ -6,10 +6,21 @@
         $allEmp = $allEmp->getResultArray();
         $data = $result->getResultArray()[0];
         $backUrl = 'leave';
-        $tableName = 'Leave/Request'
+        $tableName = 'Leave/Request';
     ?>
 
-    <div class="container-fluid">
+
+
+
+
+
+
+    
+    <?php
+        // FORM REVISE HERE
+        if($data['req_status'] == 4 && $data['req_user'] == $session['userEmpId']){
+            ?>
+     <div class="container-fluid">
         <?php include APPPATH . 'views/utilities/buttonBack.php' ?>
         <form id="formApproval" method="POST">
         <div class="mb-3">
@@ -17,13 +28,90 @@
             <input value="<?=$leaveCode?>" name="leaveCode" type="text" class="form-control" id="leaveCode" aria-describedby="emailHelp" readonly>
         </div>
         <div class="d-flex">
-            <div class="mb-3 w-75 mr-3">
+            <div class="mb-3 w-100 mr-3">
+                <label for="reqFor" class="form-label">Request For</label><br>
+                <select name="reqFor" id="reqFor" class="form-control" aria-label="Default select example" required>
+                <?php
+                    foreach($allEmp as $row){
+                        ?>
+                            <option <?=($data['req_for'] == $row['emp_id']) ? 'selected' : ''?> value="<?=$row['emp_id']?>"><?=$row['full_name']?> (<?=$row['pos_name']?>-<?=$row['level_name']?>)</option>
+                        <?php
+                    }
+                ?>
+                </select>
+            </div>
+            <div class="mb-3 w-25">
+                <label for="leaveBalance" class="form-label">Leave Balance</label>
+                <input value="<?=$data['balance_value']?>" name="leaveBalance" type="number" class="form-control" id="leaveBalance" aria-describedby="emailHelp" readonly>
+            </div>
+        </div>
+        <div class="d-flex">
+            <div class="mb-3 w-100 mr-3">
+                <label for="leaveStartDate" class="form-label">Leave Start Date</label>
+                <input value="<?=$data['leave_startdate']?>" name="leaveStartDate" min="<?=date('Y-m-d')?>" max="<?=date('Y')?>-12-31" type="date" class="form-control" id="leaveStartDate" aria-describedby="emailHelp" required>
+            </div>
+            <div class="mb-3 w-100">
+                <label for="leaveEndDate" class="form-label">Leave End Date</label>
+                <input value="<?=$data['leave_enddate']?>" name="leaveEndDate" min="<?=date('Y-m-d')?>" max="<?=date('Y')?>-12-31" type="date" class="form-control" id="leaveEndDate" aria-describedby="emailHelp" required>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="reason" class="form-label">Reason</label>
+            <textarea name="reason" class="form-control" id="reason" aria-describedby="emailHelp"><?=$data['reason']?></textarea>
+        </div>
+            <div class="mb-3">
+                <label for="reasonRevise" class="form-label">Reason Revise</label>
+                <textarea name="reasonRevise" class="form-control" id="reasonRevise" aria-describedby="emailHelp" readonly><?=$data['reason_revise']?></textarea>
+            </div>
+            <button id="btn-resubmit" type="submit" class="btn btn-primary">Submit to Approver</button>
+        </form>
+        <script>
+                        const btnResubmit = document.getElementById('btn-resubmit');
+                        btnResubmit.addEventListener('click', function(event){
+                            if(confirm('Are you sure want to resubmit this request?')){
+                                const form = document.getElementById('formApproval');
+                                console.log('approve clicked')
+                                form.setAttribute('action', '/<?=strtolower($tableName)?>/resubmit');
+                                form.submit();
+                            }else{
+                                event.preventDefault();
+                            }
+                        })
+                    </script>
+    </div>
+
+            <?php
+        }else{
+            // NORMAL FORM
+            ?>
+            <div class="container-fluid">
+        <?php include APPPATH . 'views/utilities/buttonBack.php' ?>
+        <form id="formApproval" method="POST">
+        <div class="mb-3">
+            <label for="leaveCode" class="form-label">Leave Code</label>
+            <input value="<?=$leaveCode?>" name="leaveCode" type="text" class="form-control" id="leaveCode" aria-describedby="emailHelp" readonly>
+        </div>
+        <div class="d-flex">
+            <div class="mb-3 w-100 mr-3">
+                <input type="hidden" name="reqForHidden" value="<?=$data['req_for']?>"/>
                 <label for="reqFor" class="form-label">Request For</label><br>
                 <select name="reqFor" id="reqFor" class="form-control" aria-label="Default select example" required disabled>
                 <?php
                     foreach($allEmp as $row){
                         ?>
                             <option <?=($data['req_for'] == $row['emp_id']) ? 'selected' : ''?> value="<?=$row['emp_id']?>"><?=$row['full_name']?> (<?=$row['pos_name']?>-<?=$row['level_name']?>)</option>
+                        <?php
+                    }
+                ?>
+                </select>
+            </div>
+            <div class="mb-3 w-100 mr-3">
+                <label for="reqUser" class="form-label">Request User</label><br>
+                <select name="reqUser" id="reqUser" class="form-control" aria-label="Default select example" required disabled>
+                <?php
+                    foreach($allEmp as $row){
+                        ?>
+                            <option <?=($data['req_user'] == $row['emp_id']) ? 'selected' : ''?> value="<?=$row['emp_id']?>"><?=$row['full_name']?> (<?=$row['pos_name']?>-<?=$row['level_name']?>)</option>
                         <?php
                     }
                 ?>
@@ -49,9 +137,14 @@
             <textarea name="reason" class="form-control" id="reason" aria-describedby="emailHelp" readonly><?=$data['reason']?></textarea>
         </div>
         <?php
+            // 1 -> waiting approval
+            // 2 -> partially
+            // 3 -> final
+            // 4 -> revise
             if(
                 ($data['req_status'] == 2 && $session['userLevelOrder'] == 4) // for HRD
-                || ($data['req_status'] == 1 && $data['req_for'] != $session['userEmpId'] && in_array($session['userLevelOrder'], [2,3])) // for SPV / MGR
+                || (($data['req_status'] == 1 && $data['req_user'] != $session['userEmpId'] && in_array($session['userLevelOrder'], [2,3]))) // for SPV / MGR
+                || ($data['req_status'] == 1 && in_array($data['req_user_level_order'], [2,3])  && $session['userLevelOrder'] == 4)
             ){
                 ?>
                     <div class="mb-3">
@@ -64,7 +157,7 @@
             }
 
             if(
-                ($data['req_status'] == 1 && $session['userLevelOrder'] == 4) // for HRD
+                ($data['req_status'] == 1 && in_array($data['req_user_level_order'], [1]) && $session['userLevelOrder'] == 4) // for HRD
             ){
                 ?>
                     <p class="text-danger">SPV / MGR need to approved first</p>
@@ -77,7 +170,8 @@
         <?php
             if(
                 ($data['req_status'] == 2 && $session['userLevelOrder'] == 4) // for HRD
-                || ($data['req_status'] == 1 && in_array($session['userLevelOrder'], [2,3])) // for SPV / MGR
+                || (($data['req_status'] == 1 && $data['req_user'] != $session['userEmpId'] && in_array($session['userLevelOrder'], [2,3]))) // for SPV / MGR
+                || ($data['req_status'] == 1 && in_array($data['req_user_level_order'], [2,3])  && $session['userLevelOrder'] == 4) // for HRD case req spv / mgr
             ){
                 ?>
                     <script>
@@ -112,6 +206,9 @@
                     </script>
                 <?php
             }
+        ?>
+            <?php
+        }
         ?>
 
 <?= $this->endSection() ?>

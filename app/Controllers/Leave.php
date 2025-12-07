@@ -9,32 +9,48 @@ class Leave extends BaseController
         $session = session()->get('data');
         $db = db_connect();
 
-        // $builder = $db->table('hrmemployee');
-        // $builder->select('emp.*, MAX(ca.effective_date) as effective_date, max(pos.pos_code), pos.pos_name, lev.level_code, lev.level_name');
-        // $builder->join('hrmcareer ca', 'emp.emp_id = ca.emp_id');
-        // $builder->join('hrmposition pos', 'ca.pos_code = pos.pos_code', 'left');
-        // $builder->join('hrmlevel lev', 'ca.level_code = lev.level_code', 'left');
-        // $builder->groupBy('emp.emp_id');
 
-        $builder = $db->table('hrmleave lv'); // Set the main table with alias
-        $builder->select('lv.*, emp.full_name as req_for_name,  aprvSts.status_name');
-        // Joins
-        $builder->join('hrmemployee emp', 'lv.req_for = emp.emp_id');
-        $builder->join('hrmposition pos', 'emp.pos_code = pos.pos_code');
-        $builder->join('hrmlevel lev', 'emp.level_code = lev.level_code');
-        //$builder->join('hrmemployee reqUser', 'lv.req_user = reqUser.emp_id');
-        $builder->join('hrmapprovalstatus aprvSts', 'lv.req_status = aprvSts.status_code');
-
-        if($session['userLevelOrder'] != 4){
-            // $builder->where('req_for', $session['userEmpId']);
-            // $builder->orWhere('req_user', $session['userEmpId']);
-            // $builder->where('parent_code', $session['userPosCode']);
-        }else if($session['userLevelOrder'] == 1){
-            $builder->where('req_user', $session['userEmpId']);
-            $builder->orWhere('req_for', $session['userEmpId']);
+        // Build reusable subquery
+        $subQuery = $db->table('hrmemployee a')
+            ->select('a.emp_id')
+            ->join('hrmposition b', 'a.pos_code = b.pos_code')
+            ->join('hrmlevel c', 'a.level_code = c.level_code')
+            ->groupStart()
+                ->where('c.level_order <=', $session['userLevelOrder'])
+                ->orWhere('a.pos_code', $session['userPosCode'])
+                ->orWhere('b.parent_code', $session['userPosCode'])
+            ->groupEnd()
+            ->getCompiledSelect();
+        if($session['userLevelOrder'] == 1){
+            $subQuery = $db->table('hrmemployee a')
+                ->select('a.emp_id')
+                ->join('hrmposition b', 'a.pos_code = b.pos_code')
+                ->join('hrmlevel c', 'a.level_code = c.level_code')
+                ->where('a.emp_id', $session['userEmpId'])
+                ->getCompiledSelect();
         }
 
-        $query = $builder->get();
+        // Build main query
+        $query = $db->table('hrmleave d')
+            ->select('d.*, reqfor.full_name as req_for_name, req.full_name as req_user_name, e.status_name')
+            ->join('hrmapprovalstatus e', 'd.req_status = e.status_code')
+            ->join('hrmemployee req', 'd.req_user = req.emp_id')
+            ->join('hrmemployee reqfor', 'd.req_for = reqfor.emp_id')
+            ->where("req_for IN ($subQuery)")
+            ->orWhere("req_user IN ($subQuery)")
+            ->get();
+
+
+
+        // if($session['userLevelOrder'] != 4){
+        //     // $builder->where('req_for', $session['userEmpId']);
+        //     // $builder->orWhere('req_user', $session['userEmpId']);
+        //     // $builder->where('parent_code', $session['userPosCode']);
+        // }else if($session['userLevelOrder'] == 1){
+        //     $builder->where('req_user', $session['userEmpId']);
+        //     $builder->orWhere('req_for', $session['userEmpId']);
+        // }
+
         $data['result'] = $query->getResultArray();
         return view('Leave/request', $data);
     }
@@ -88,6 +104,7 @@ class Leave extends BaseController
         $newLeaveEndDate = $_POST['leaveEndDate'];
         $newReqUser = $session['userEmpId'];
         $newReqDate = date('Y-m-d');
+        $newReason = $_POST['reason'];
 
         $date1 = new \DateTime($newLeaveStartDate);
         $date2 = new \DateTime($newLeaveEndDate);
@@ -102,7 +119,6 @@ class Leave extends BaseController
         else if($newReqFor != $newReqUser){
             $newReqStatus = 2; 
         }
-        $newReason = $_POST['reason'];
 
 
         $newData = [
@@ -162,51 +178,55 @@ class Leave extends BaseController
         $session = session()->get('data');
         $db = db_connect();
 
-        // Subquery for latest career per employee
-        $subquery = "
-            SELECT c1.*
-            FROM hrmcareer c1
-            JOIN (
-                SELECT emp_id, MAX(effective_date) AS latest_date
-                FROM hrmcareer
-                GROUP BY emp_id
-            ) c2 ON c1.emp_id = c2.emp_id 
-                AND c1.effective_date = c2.latest_date
-        ";
+         // Build reusable subquery
+        $builder = $db->table('hrmemployee a')
+            ->select('a.*, b.pos_name, c.level_name')
+            ->join('hrmposition b', 'a.pos_code = b.pos_code')
+            ->join('hrmlevel c', 'a.level_code = c.level_code')
+            ->groupStart()
+                ->where('c.level_order <=', $session['userLevelOrder'])
+                ->orWhere('a.pos_code', $session['userPosCode'])
+                ->orWhere('b.parent_code', $session['userPosCode'])
+            ->groupEnd();
 
-        // Main builder
-        $builder = $db->table("($subquery) data");
-
-        $builder->select('data.*, emp.*, pos.pos_code, pos.pos_name, lev.level_code, lev.level_name, pos.parent_code');
-        $builder->join('hrmemployee emp', 'data.emp_id = emp.emp_id');
-        $builder->join('hrmposition pos', 'data.pos_code = pos.pos_code', 'left');
-        $builder->join('hrmlevel lev', 'data.level_code = lev.level_code', 'left');
-
-        $builder->where('lev.level_order <=', $session['userLevelOrder']);
         if($session['userLevelOrder'] == 1){
-            $builder->where('data.emp_id', $session['userEmpId']);
+            $builder = $db->table('hrmemployee a')
+                ->select('a.*, b.pos_name, c.level_name')
+                ->join('hrmposition b', 'a.pos_code = b.pos_code')
+                ->join('hrmlevel c', 'a.level_code = c.level_code')
+                ->where('a.emp_id', $session['userEmpId']);
         }
-        else if($session['userLevelOrder'] != 4){
-            $builder->where('data.pos_code', $session['userPosCode']);
-            $builder->orWhere('pos.parent_code', $session['userPosCode']);
-        }
+
 
         $query = $builder->get();
         $data['allEmp'] = $query;
 
-        $builder = $db->table("hrmleave lv");
-        $builder->select('lv.*, reqFor.full_name as req_for_name, reqUser.full_name as req_user_name, aprvSts.status_name, lvbal.balance_value');
-        $builder->join('hrmemployee reqFor', 'lv.req_for = reqFor.emp_id', 'left');
-        $builder->join('hrmemployee reqUser', 'lv.req_user = reqUser.emp_id', 'left');
-        $builder->join('hrmapprovalstatus aprvSts', 'lv.req_status = aprvSts.status_code', 'left');
-        $builder->join('hrmleavebalance lvbal', 'lv.req_for = lvbal.emp_id', 'left');
-        $builder->where('lvbal.year', date('Y'));
-        $builder->where('lvbal.active_status', 1);
-        if($session['userLevelOrder'] != 4){
-            $builder->where('lv.req_for', $session['userEmpId']);
-            $builder->orWhere('lv.req_user', $session['userEmpId']);
-        }
-        $builder->where('lv.leave_code', $leaveCode);
+        // $builder = $db->table("hrmleave lv");
+        // $builder->select('lv.*, reqFor.full_name as req_for_name, reqUser.full_name as req_user_name, aprvSts.status_name, lvbal.balance_value');
+        // $builder->join('hrmemployee reqFor', 'lv.req_for = reqFor.emp_id', 'left');
+        // $builder->join('hrmemployee reqUser', 'lv.req_user = reqUser.emp_id', 'left');
+        // $builder->join('hrmapprovalstatus aprvSts', 'lv.req_status = aprvSts.status_code', 'left');
+        // $builder->join('hrmleavebalance lvbal', 'lv.req_for = lvbal.emp_id', 'left');
+        // $builder->where('lvbal.year', date('Y'));
+        // $builder->where('lvbal.active_status', 1);
+        // if($session['userLevelOrder'] != 4){
+        //     $builder->where('lv.req_for', $session['userEmpId']);
+        //     $builder->orWhere('lv.req_user', $session['userEmpId']);
+        // }
+        // $builder->where('lv.leave_code', $leaveCode);
+
+         // Build main query
+        $builder = $db->table('hrmleave d')
+            ->select('d.*, reqfor.full_name as req_for_name, req.full_name as req_user_name, e.status_name, lvbl.balance_value, reqUserLevel.level_order as req_user_level_order')
+            ->join('hrmapprovalstatus e', 'd.req_status = e.status_code')
+            ->join('hrmemployee req', 'd.req_user = req.emp_id')
+            ->join('hrmemployee reqfor', 'd.req_for = reqfor.emp_id')
+            ->join('hrmleavebalance lvbl', 'd.req_for = lvbl.emp_id')
+            ->join('hrmlevel reqUserLevel', 'req.level_code = reqUserLevel.level_code')
+            ->where('lvbl.year', date('Y'))
+            ->where('lvbl.active_status', 1)
+            ->where('d.leave_code', $leaveCode);
+
         $query = $builder->get();
         $data['result'] = $query;
         $data['leaveCode'] = $leaveCode;
@@ -220,8 +240,8 @@ class Leave extends BaseController
         $builder = $db->table('hrmleave');
 
         $leaveCode = $_POST['leaveCode'];
-        $reqFor = $this->request->getPost('reqFor');
-        $reqUser = $session['userEmpId'];
+        // $reqFor = $this->request->getPost('reqFor');
+        // $reqUser = $session['userEmpId'];
         $newReasonRevise = $_POST['reasonRevise'];
 
         $builder->set([
@@ -230,14 +250,137 @@ class Leave extends BaseController
         ]);
 
         $builder->where('leave_code', $leaveCode);
-        $builder->where('req_for', $reqFor);
-        $builder->where('req_user', $reqUser);
         $query = $builder->update();
 
         if($query){
             echo "<script>alert('success update revised')</script>";
         }else{
             echo "<script>alert('failed update revised')</script>";
+        }
+        return $this->request();
+
+    }
+
+    public function requestResubmit(): string
+    {
+        $session = session()->get('data');
+        $db = db_connect();
+
+        $leaveCode = $_POST['leaveCode'];
+        $newReqFor = $_POST['reqFor'];
+        $newLeaveStartDate = $_POST['leaveStartDate'];
+        $newLeaveEndDate = $_POST['leaveEndDate'];
+        $newReqUser = $session['userEmpId'];
+        $newReqDate = date('Y-m-d');
+        $newReason = $_POST['reason'];
+
+        $date1 = new \DateTime($newLeaveStartDate);
+        $date2 = new \DateTime($newLeaveEndDate);
+
+        $diff = $date1->diff($date2);
+        $useBalance = $diff->days + 1; 
+
+        $newReqStatus = 1; 
+        if($newReqFor != $newReqUser){
+            $newReqStatus = 2; 
+        }
+
+
+        $newData = [
+            'req_for' => $newReqFor,
+            'leave_startdate' => $newLeaveStartDate,
+            'leave_enddate' => $newLeaveEndDate,
+            'req_user' => $newReqUser,
+            'req_date' => $newReqDate,
+            'req_status' => $newReqStatus,
+            'reason' => $newReason,
+        ];
+
+
+        $db = db_connect();
+        $builder = $db->table('hrmleave');
+        $builder->where('leave_code', $leaveCode);
+        $builder->set($newData);
+        $query = $builder->update();
+
+
+        if($query){
+            echo "<script>alert('success resubmit request')</script>";
+        }else{
+            echo "<script>alert('failed resubmit request')</script>";
+        }
+
+        return $this->request();
+    }
+
+    public function requestApprove(): string
+    {
+        $session = session()->get('data');
+        $db = db_connect();
+        $builder = $db->table('hrmleave');
+
+        $leaveCode = $_POST['leaveCode'];
+        $reqFor = $_POST['reqForHidden'];
+        $newLeaveStartDate = $_POST['leaveStartDate'];
+        $newLeaveEndDate = $_POST['leaveEndDate'];
+
+        $date1 = new \DateTime($newLeaveStartDate);
+        $date2 = new \DateTime($newLeaveEndDate);
+
+        $diff = $date1->diff($date2);
+        $useBalance = $diff->days + 1; 
+
+        $newReqStatus = 2; 
+        if($session['userLevelOrder'] == 4){
+            $newReqStatus = 3; 
+        }
+
+        $newData = [
+            'req_status' => $newReqStatus,
+            'modified_date' => date('Y-m-d'),
+            'modified_user' => $session['userEmpId']
+        ];
+
+        if($newReqStatus == 3){
+            $newData['approved_date'] = date('Y-m-d');
+        }
+
+        $builder->set($newData);
+
+        $builder->where('leave_code', $leaveCode);
+        $query = $builder->update();
+
+        if($query){
+
+        // update leave balance
+        if($newReqStatus == 3){
+            $builder = $db->table('hrmleavebalance');
+            $builder->where('year', date('Y'));
+            $builder->where('active_status', 1);
+            $builder->where('emp_id', $reqFor);
+            $query2 = $builder->get();
+            $dataBalance = $query2->getResultArray()[0];
+
+            $builder = $db->table('hrmleavebalance');
+            $builder->set([
+                'balance_value' => intval($dataBalance['balance_value']) - intval($useBalance),
+            ]);
+            $builder->where('year', date('Y'));
+            $builder->where('active_status', 1);
+            $builder->where('emp_id', $reqFor);
+            $query3 = $builder->update();
+
+            if($query3){
+                echo "<script>alert('success update balance')</script>";
+            }else{
+                echo "<script>alert('failed update balance')</script>";
+            }
+        }
+
+
+            echo "<script>alert('success approve')</script>";
+        }else{
+            echo "<script>alert('failed approve')</script>";
         }
         return $this->request();
 

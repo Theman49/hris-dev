@@ -55,8 +55,9 @@ $routes->group('leave', ['filter' => 'authfilter'], function($routes){
     $routes->get('request/add', 'Leave::requestAdd');
     $routes->get('request/edit/(:segment)', 'Leave::requestEdit/$1');
     $routes->post('request/add', 'Leave::requestSubmit');
-    $routes->post('request/aprove', 'Leave::requestApprove');
+    $routes->post('request/approve', 'Leave::requestApprove');
     $routes->post('request/revise', 'Leave::requestRevise');
+    $routes->post('request/resubmit', 'Leave::requestResubmit');
 
     //API
     $routes->post('balance/get', 'Leave::getBalance');

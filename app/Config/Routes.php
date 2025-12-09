@@ -21,6 +21,7 @@ $routes->group('recruitment', ['filter' => 'authfilter'], function($routes){
     $routes->get('request/edit/(:segment)', 'Recruitment::requestEdit/$1', ['filter' => 'adminfilter']);
     $routes->post('request/revise', 'Recruitment::requestRevise', ['filter' => 'adminfilter']);
     $routes->post('request/approve', 'Recruitment::requestApprove', ['filter' => 'adminfilter']);
+    $routes->post('request/resubmit', 'Recruitment::requestResubmit', ['filter' => 'adminfilter']);
 
     $routes->get('applicant', 'Recruitment::applicant', ['filter' => 'adminfilter']);
     $routes->get('applicant/add', 'Recruitment::applicantAdd', ['filter' => 'adminfilter']);

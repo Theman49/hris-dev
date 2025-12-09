@@ -58,7 +58,13 @@
             <label for="effectiveJoinDate" class="form-label">Effective Join Date</label>
             <input value="<?=$data['effective_join_date']?>" name="effectiveJoinDate" type="date" class="form-control" id="effectiveJoinDate" aria-describedby="emailHelp">
         </div>
-        <button type="submit" id="btn-submit" class="btn btn-primary">Submit</button>
+        <?php
+            if($data['applicant_status'] < 5){
+        ?>
+            <button type="submit" id="btn-submit" class="btn btn-primary">Submit</button>
+        <?php
+            }
+        ?>
         </form>
 
     </div>

@@ -14,7 +14,7 @@
         <?php include APPPATH . 'views/utilities/buttonBack.php' ?>
         <form action="/recruitment/request/add" method="POST">
         <div class="mb-3">
-            <label for="recCount" class="form-label">Recruitment People</label>
+            <label for="recCount" class="form-label">Head Count</label>
             <input name="recCount" type="number" min="1" class="form-control" id="recCount" aria-describedby="emailHelp" required>
         </div>
         <div class="mb-3">
@@ -49,7 +49,7 @@
         </div>
         <div class="mb-3">
             <label for="reason" class="form-label">Reason</label>
-            <textarea name="reason" class="form-control" id="reason" aria-describedby="emailHelp"></textarea>
+            <textarea name="reason" class="form-control" id="reason" aria-describedby="emailHelp" required></textarea>
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
         </form>

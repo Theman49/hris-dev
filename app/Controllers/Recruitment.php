@@ -164,6 +164,49 @@ class Recruitment extends BaseController
         return $this->request();
     }
 
+    public function requestResubmit(): string
+    {
+        $session = session()->get('data');
+
+        $reqCode = $_POST['reqCodeHidden'];
+        $newRecCount = $_POST['recCount'];
+        $newPosCode = $_POST['posCode'];
+        $newLevelCode = $_POST['levelCode'];
+        $newJoinDate = $_POST['expectedJoinDate'];
+        $newReqStatus = 1;
+        $newReqEmpId = $session['userEmpId'];
+        $newReqDate = date('Y-m-d');
+        $newReason = $_POST['reason'];
+
+
+        $newData = [
+            'pos_code' => $newPosCode,
+            'level_code' => $newLevelCode,
+            'req_status' => $newReqStatus,
+            'expected_join_date' => $newJoinDate,
+            'req_empid' => $newReqEmpId,
+            'modified_user' => $newReqEmpId,
+            'req_date' => $newReqDate,
+            'modified_date' => $newReqDate,
+            'rec_count' => $newRecCount,
+            'reason' => $newReason,
+        ];
+
+
+        $db = db_connect();
+        $builder = $db->table('hrmrecruitmentreq');
+        $builder->set($newData);
+        $builder->where('req_code', $reqCode);
+        $query = $builder->update();
+        if($query){
+            echo "<script>alert('success')</script>";
+        }else{
+            echo "<script>alert('failed')</script>";
+        }
+        return $this->request();
+
+    }
+
     public function applicant(): string
     {
         $session = session()->get('data');

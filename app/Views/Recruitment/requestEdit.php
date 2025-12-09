@@ -23,7 +23,7 @@
             <input value="<?=$data['req_code']?>" name="reqCode" type="text" min="1" class="form-control" id="reqCount" aria-describedby="emailHelp" readonly>
         </div>
         <div class="mb-3">
-            <label for="recCount" class="form-label">Recruitment People</label>
+            <label for="recCount" class="form-label">Head Count</label>
             <input value="<?=$data['rec_count']?>" name="recCount" type="number" min="1" class="form-control" id="recCount" aria-describedby="emailHelp" readonly>
         </div>
         <div class="mb-3">
@@ -119,10 +119,11 @@
         <form id="formApprove" method="POST">
         <div class="mb-3">
             <label for="reqCode" class="form-label">Recruitment Request Code</label>
+            <input value="<?=$data['req_code']?>" name="reqCodeHidden" type="hidden" class="form-control" id="reqCount" aria-describedby="emailHelp" >
             <input value="<?=$data['req_code']?>" name="reqCode" type="text" min="1" class="form-control" id="reqCount" aria-describedby="emailHelp"  readonly>
         </div>
         <div class="mb-3">
-            <label for="recCount" class="form-label">Recruitment People</label>
+            <label for="recCount" class="form-label">Head Count</label>
             <input value="<?=$data['rec_count']?>" name="recCount" type="number" min="1" class="form-control" id="recCount" aria-describedby="emailHelp" required>
         </div>
         <div class="mb-3">

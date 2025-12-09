@@ -320,9 +320,11 @@ class Recruitment extends BaseController
 
             $empId = 'EMP' . date('Ymdhis');
             $careerCode = 'CAR' . date('Ymdhis');
-            $date = new \DateTime();
-            $newEffectiveDate = $date->format('Y-m-d');
-            $newEndDate = $date->modify('+6 month')->format('Y-m-d');
+            $leaveBalanceCode = 'LVL' . date('Ymdhis');
+            // $date = new \DateTime();
+            $newEffectiveDate = $_POST['effectiveJoinDate'];
+            $newEndDate = new \DateTime($newEffectiveDate)->modify('+6 month')->format('Y-m-d');
+            $balanceValue = 13 - intval(new \DateTime($newEffectiveDate)->format('m'));
 
             // insert to career
             $builder = $db->table('hrmcareer');
@@ -344,6 +346,8 @@ class Recruitment extends BaseController
             $newData = [
                 'emp_id' => $empId,
                 'full_name' => $newFullName,
+                'pos_code' => $recruitmentData['pos_code'],
+                'level_code' => $recruitmentData['level_code'],
                 'last_education' => $newLastEducation,
                 'birth_date' => $newBirthDate,
                 'address' => $newAddress,
@@ -352,7 +356,20 @@ class Recruitment extends BaseController
             $builder->set($newData);
             $query3 = $builder->insert();
 
-            if($query1 && $query2 && $query3){
+
+            // insert to balance
+            $builder = $db->table('hrmleavebalance');
+            $newData = [
+                'leavebalance_id' => $leaveBalanceCode,
+                'emp_id' => $empId,
+                'balance_value' => $balanceValue,
+                'year' => date('Y'),
+                'active_status' => 1,
+            ];
+            $builder->set($newData);
+            $query4 = $builder->insert();
+
+            if($query1 && $query2 && $query3 && $query4){
                 echo "<script>alert('success insert new employee')</script>";
             }else{
                 echo "<script>alert('failed insert new employee')</script>";

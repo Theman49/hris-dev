@@ -5,7 +5,7 @@
         $tableName = 'Recruitment/Applicant';
         // $allRecCode = $recCodeAll->getResultArray();
         $allRecCode = $result;
-        
+        $backUrl = $tableName; 
     ?>
 
     <div class="container-fluid">

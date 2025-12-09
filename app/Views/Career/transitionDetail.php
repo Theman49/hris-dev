@@ -7,7 +7,10 @@
     $headerAlias = ['career_code', 'pos_name','level_name', 'careertype_name', 'effective_date', 'end_date'];
     $data =  $query->getResultArray(); 
     $tableName = 'Career/Detail';
-    if($session['userLevelOrder'] == 1){
+    if(
+        ($session['userLevelOrder'] == 1)
+        || ($session['userEmpId'] == $empId)
+    ){
         $hideAdd = true;
     }
     $backUrl = 'career';

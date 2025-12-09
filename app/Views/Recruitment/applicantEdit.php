@@ -5,11 +5,12 @@
         $tableName = 'Recruitment/Applicant';
         $allAppStatus = $appStatusAll->getResultArray();
         $data = $query->getResultArray()[0];
+        $backUrl = $tableName;
     ?>
 
     <div class="container-fluid">
         <?php include APPPATH . 'views/utilities/buttonBack.php' ?>
-        <form action="/recruitment/applicant/edit" method="POST">
+        <form id="formUpdate" method="POST">
 
         <div class="d-flex justify-content-between">
             <div class="mb-3 w-100 mr-3">
@@ -22,7 +23,7 @@
             </div>
             <div class="mb-3 w-100">
                 <label for="applicantStatus" class="form-label">Applicant Status</label><br>
-                <select name="applicantStatus" class="form-control" aria-label="Default select example" required>
+                <select name="applicantStatus" id="applicantStatus" class="form-control" aria-label="Default select example" required>
                 <?php
                     foreach($allAppStatus as $row){
                         ?>
@@ -53,9 +54,43 @@
             <label for="address" class="form-label">Address</label>
             <textarea name="address" class="form-control" id="address" aria-describedby="emailHelp"><?=$data['address']?></textarea>
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <div class="mb-3">
+            <label for="effectiveJoinDate" class="form-label">Effective Join Date</label>
+            <input value="<?=$data['effective_join_date']?>" name="effectiveJoinDate" type="date" class="form-control" id="effectiveJoinDate" aria-describedby="emailHelp">
+        </div>
+        <button type="submit" id="btn-submit" class="btn btn-primary">Submit</button>
         </form>
 
     </div>
+     <script>
+        const btnSubmit = document.getElementById('btn-submit');
+
+        btnSubmit.addEventListener('click', function(event){
+            const currApplicantStatus = document.getElementById('applicantStatus');
+            const joinDate = document.getElementById('effectiveJoinDate'); 
+            if(currApplicantStatus.value == 5){
+                if(!joinDate.value){
+                    joinDate.setAttribute('required', true);
+                    joinDate.focus();
+                }else{
+                    if(confirm('Are you sure want to update this applicant?')){
+                        const form = document.getElementById('formUpdate');
+                        form.setAttribute('action', '/<?=strtolower($tableName)?>/edit');
+                        form.submit();
+                    }else{
+                        event.preventDefault();
+                    }
+                }
+            }else{
+                if(confirm('Are you sure want to update this applicant?')){
+                    const form = document.getElementById('formUpdate');
+                    form.setAttribute('action', '/<?=strtolower($tableName)?>/edit');
+                    form.submit();
+                }else{
+                    event.preventDefault();
+                }
+            }
+        })
+    </script>
 
 <?= $this->endSection() ?>

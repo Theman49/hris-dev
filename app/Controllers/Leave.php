@@ -94,7 +94,7 @@ class Leave extends BaseController
         return view('Leave/requestAdd', $data);
     }
 
-    public function requestSubmit(): string
+    public function requestSubmit()
     {
         $session = session()->get('data');
 
@@ -105,12 +105,29 @@ class Leave extends BaseController
         $newReqUser = $session['userEmpId'];
         $newReqDate = date('Y-m-d');
         $newReason = $_POST['reason'];
+        $newReqForSick = $_POST['reqForSick'];
 
-        $date1 = new \DateTime($newLeaveStartDate);
-        $date2 = new \DateTime($newLeaveEndDate);
+        // $date1 = new \DateTime($newLeaveStartDate);
+        // $date2 = new \DateTime($newLeaveEndDate);
 
-        $diff = $date1->diff($date2);
-        $useBalance = $diff->days + 1; 
+        // $diff = $date1->diff($date2);
+        // $useBalance = $diff->days + 1; 
+        $useBalance = $this->countUseBalance($newLeaveStartDate, $newLeaveEndDate);
+
+        // when req for sick, not deduct
+        // and save attachment
+        $newAttachment = '';
+        if($newReqForSick == 1){
+            $useBalance = 0;
+
+            $file = $this->request->getFile('attachment');
+
+
+            // Move file to writable/uploads
+            $newName = $file->getRandomName();
+            $file->move(WRITEPATH . 'uploads', $newName);
+            $newAttachment = $newName;
+        }
 
         $newReqStatus = 1; 
         if($session['userLevelOrder'] == 4){
@@ -130,6 +147,8 @@ class Leave extends BaseController
             'req_date' => $newReqDate,
             'req_status' => $newReqStatus,
             'reason' => $newReason,
+            'is_sick_leave' => $newReqForSick,
+            'attachment' => $newAttachment,
         ];
 
 
@@ -141,7 +160,8 @@ class Leave extends BaseController
         // update leave balance
         if($newReqStatus == 3){
             $builder = $db->table('hrmleavebalance');
-            $builder->where('year', date('Y'));
+            $builder->where('start_period <=', date('Y-m-d'));
+            $builder->where('end_period >=', date('Y-m-d'));
             $builder->where('active_status', 1);
             $builder->where('emp_id', $newReqFor);
             $query2 = $builder->get();
@@ -151,7 +171,8 @@ class Leave extends BaseController
             $builder->set([
                 'balance_value' => intval($dataBalance['balance_value']) - intval($useBalance),
             ]);
-            $builder->where('year', date('Y'));
+            $builder->where('start_period <=', date('Y-m-d'));
+            $builder->where('end_period >=', date('Y-m-d'));
             $builder->where('active_status', 1);
             $builder->where('emp_id', $newReqFor);
             $query3 = $builder->update();
@@ -223,7 +244,8 @@ class Leave extends BaseController
             ->join('hrmemployee reqfor', 'd.req_for = reqfor.emp_id')
             ->join('hrmleavebalance lvbl', 'd.req_for = lvbl.emp_id')
             ->join('hrmlevel reqUserLevel', 'req.level_code = reqUserLevel.level_code')
-            ->where('lvbl.year', date('Y'))
+            ->where('lvbl.start_period <=', date('Y-m-d'))
+            ->where('lvbl.end_period >=', date('Y-m-d'))
             ->where('lvbl.active_status', 1)
             ->where('d.leave_code', $leaveCode);
 
@@ -273,12 +295,38 @@ class Leave extends BaseController
         $newReqUser = $session['userEmpId'];
         $newReqDate = date('Y-m-d');
         $newReason = $_POST['reason'];
+        $newReqForSick = $_POST['reqForSick'];
 
-        $date1 = new \DateTime($newLeaveStartDate);
-        $date2 = new \DateTime($newLeaveEndDate);
+        $useBalance = $this->countUseBalance($newLeaveStartDate, $newLeaveEndDate);
 
-        $diff = $date1->diff($date2);
-        $useBalance = $diff->days + 1; 
+        // get old data
+        $builder = $db->table('hrmleave')
+                        ->where('leave_code', $leaveCode)
+                        ->get();
+
+        $result = $builder->getResultArray()[0];
+
+        // when req for sick, not deduct
+        $newAttachment = '';
+        if($newReqForSick == 1){
+            $useBalance = 0;
+
+            $file = $this->request->getFile('attachment');
+
+            // remove old file
+            $uploadPath = WRITEPATH . 'uploads/';
+            $fileName   = $result['attachment'];
+
+            // ✅ Delete old file if exists
+            if (file_exists($uploadPath . $fileName)) {
+                unlink($uploadPath . $fileName);
+            }
+
+            // Move file to writable/uploads
+            $newName = $file->getRandomName();
+            $file->move(WRITEPATH . 'uploads', $newName);
+            $newAttachment = $newName;
+        }
 
         $newReqStatus = 1; 
         if($newReqFor != $newReqUser){
@@ -294,6 +342,8 @@ class Leave extends BaseController
             'req_date' => $newReqDate,
             'req_status' => $newReqStatus,
             'reason' => $newReason,
+            'is_sick_leave' => $newReqForSick,
+            'attachment' => $newAttachment,
         ];
 
 
@@ -323,12 +373,15 @@ class Leave extends BaseController
         $reqFor = $_POST['reqForHidden'];
         $newLeaveStartDate = $_POST['leaveStartDate'];
         $newLeaveEndDate = $_POST['leaveEndDate'];
+        $newReqForSick = $_POST['reqForSick'];
 
-        $date1 = new \DateTime($newLeaveStartDate);
-        $date2 = new \DateTime($newLeaveEndDate);
+        
+        $useBalance = $this->countUseBalance($newLeaveStartDate, $newLeaveEndDate);
 
-        $diff = $date1->diff($date2);
-        $useBalance = $diff->days + 1; 
+        // when req for sick, not deduct
+        if($newReqForSick == 1){
+            $useBalance = 0;
+        }
 
         $newReqStatus = 2; 
         if($session['userLevelOrder'] == 4){
@@ -355,7 +408,8 @@ class Leave extends BaseController
         // update leave balance
         if($newReqStatus == 3){
             $builder = $db->table('hrmleavebalance');
-            $builder->where('year', date('Y'));
+            $builder->where('start_period <=', date('Y-m-d'));
+            $builder->where('end_period >=', date('Y-m-d'));
             $builder->where('active_status', 1);
             $builder->where('emp_id', $reqFor);
             $query2 = $builder->get();
@@ -365,7 +419,8 @@ class Leave extends BaseController
             $builder->set([
                 'balance_value' => intval($dataBalance['balance_value']) - intval($useBalance),
             ]);
-            $builder->where('year', date('Y'));
+            $builder->where('start_period <=', date('Y-m-d'));
+            $builder->where('end_period >=', date('Y-m-d'));
             $builder->where('active_status', 1);
             $builder->where('emp_id', $reqFor);
             $query3 = $builder->update();
@@ -387,6 +442,160 @@ class Leave extends BaseController
     }
 
 
+    public function countUseBalance($leaveStartDate, $leaveEndDate){
+        $db = db_connect();
+
+        $builder = $db->table('hrmcompparam')
+                    ->like('param_code', 'leave');
+        $query = $builder->get();
+        $result = $query->getResultArray();
+
+        $isDeduct = 0;
+        $listDayOff = [];
+
+        foreach($result as $row){
+            if($row['param_code'] == 'leave_deduct'){
+                $isDeduct = $row['param_value'];
+            }else if($row['param_code'] == 'leave_day_off'){
+                $temp = $row['param_value'];
+                $listDayOff = explode(',', $row['param_value']);
+            }
+        }
+
+        $date1 = new \DateTime($leaveStartDate);
+        $date2 = new \DateTime($leaveEndDate);
+
+        $useBalance = 0;
+
+        if($isDeduct == 1){
+            $date2->modify('+1 day');
+            while($date1 < $date2){
+                 // 0 = Sunday 
+                if (!in_array($date1->format('w'), $listDayOff)) {
+                    $useBalance++;
+                }
+
+                $date1->modify('+1 day');
+            }
+        }else{
+            $diff = $date1->diff($date2);
+            $useBalance = $diff->days + 1; 
+        }
+
+        return $useBalance;
+
+    }
+
+
+    /// generate balance
+    public function balance(): string
+    {
+        $session = session()->get('data');
+        $db = db_connect();
+
+        // Subquery for latest career per employee
+        $subquery = "
+            SELECT c1.*
+            FROM hrmcareer c1
+            JOIN (
+                SELECT emp_id, MAX(effective_date) AS latest_date
+                FROM hrmcareer
+                GROUP BY emp_id
+            ) c2 ON c1.emp_id = c2.emp_id 
+                AND c1.effective_date = c2.latest_date
+        ";
+
+        // Main builder
+        $builder = $db->table("($subquery) data");
+
+        $builder->select('data.*, emp.*, pos.pos_code, pos.pos_name, lev.level_code, lev.level_name, pos.parent_code');
+        $builder->join('hrmemployee emp', 'data.emp_id = emp.emp_id');
+        $builder->join('hrmposition pos', 'data.pos_code = pos.pos_code', 'left');
+        $builder->join('hrmlevel lev', 'data.level_code = lev.level_code', 'left');
+
+        $builder->where('lev.level_order <=', $session['userLevelOrder']);
+        if($session['userLevelOrder'] == 1){
+            $builder->where('data.emp_id', $session['userEmpId']);
+        }
+        else if($session['userLevelOrder'] != 4){
+            $builder->where('data.pos_code', $session['userPosCode']);
+            $builder->orWhere('pos.parent_code', $session['userPosCode']);
+        }
+
+        $query = $builder->get();
+        $data['query'] = $query;
+        return view('Leave/balance', $data);
+    }
+
+    public function balanceDetail($empId){
+        $db = db_connect();
+        $builder = $db->table('hrmleavebalance')
+                        ->select("*, CASE WHEN active_status = 1 THEN 'active' WHEN active_status = 0 THEN 'inactive' END AS active_status")
+                        ->where('emp_id', $empId)
+                        ->get();
+        $data['query'] = $builder; 
+        $data['targetEmpId'] = $empId;
+        return view('Leave/balanceDetail', $data);
+    }
+
+    public function generateBalance(){
+
+        $empId = $_POST['empId'];
+        $db = db_connect();
+
+        // get last career
+        $builder = $db->table('hrmcareer')
+                        ->where('emp_id', $empId)
+                        ->orderBy('end_date DESC, effective_date DESC')
+                        ->limit(1)
+                        ->get();
+        $data = $builder->getResultArray()[0];
+        // get end_date if set, if not get effective_date last career
+        $getDate = $data['end_date'];
+        if($getDate == ''){
+            $getDate = $data['effective_date']; 
+        }
+
+        $getDate = new \DateTime($getDate)->modify('+1 day')->format('Y-m-d');
+        $newEndPeriod = new \DateTime($getDate)->modify('+12 month')->format('Y-m-d');
+
+        // set inactive or 0 for old balance
+
+        $builder = $db->table('hrmleavebalance');
+
+        $builder->set([
+            'active_status' => 0
+        ]);
+        $builder->where('emp_id', $empId)
+                ->groupStart()
+                    ->where('end_period <=', $getDate)
+                    ->orWhere('start_period <=', $getDate)
+                ->groupEnd()
+                ->update();
+
+        // generate balance for 1 next year
+
+        $builder = $db->table('hrmleavebalance');
+        $builder->set([
+            'leavebalance_id' => 'LVL' . date('Ymdhis'),
+            'emp_id' => $empId,
+            'balance_value' => '12',
+            'start_period' => $getDate,
+            'end_period' => $newEndPeriod,
+            'active_status' => 1
+        ]);
+        $query = $builder->insert();
+        if($query){
+            echo "<script>alert('success generate new balance')</script>";
+        }else{
+            echo "<script>alert('failed generate new balance')</script>";
+        }
+
+        return $this->balance();
+    }
+
+
+
 
 
 
@@ -400,7 +609,8 @@ class Leave extends BaseController
 
         $builder = $db->table('hrmleavebalance'); 
         $builder->where('emp_id', $empId);
-        $builder->where('year', date('Y'));
+        $builder->where('start_period <=', date('Y-m-d'));
+        $builder->where('end_period >=', date('Y-m-d'));
         $builder->where('active_status', 1);
         $query = $builder->get();
         $balanceValue = 0;
@@ -411,5 +621,35 @@ class Leave extends BaseController
             'balance_value' => $balanceValue
         ];
         return json_encode($result); 
+    }
+
+
+    public function getLeaveSetting()
+    {
+        $db = db_connect();
+
+        $builder = $db->table('hrmcompparam');
+        $builder->like('param_code', 'leave');
+        $query = $builder->get();
+
+        $result = [];
+        if($query->getResultArray()){
+            $result = $query->getResultArray(); 
+        }
+
+        return json_encode($result);
+    }
+
+    public function showAttachment($filename)
+    {
+        $path = WRITEPATH . 'uploads/' . $filename;
+
+        if (!is_file($path)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        return $this->response
+            ->setHeader('Content-Type', mime_content_type($path))
+            ->setBody(file_get_contents($path));
     }
 }

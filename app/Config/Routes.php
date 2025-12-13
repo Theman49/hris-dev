@@ -60,8 +60,14 @@ $routes->group('leave', ['filter' => 'authfilter'], function($routes){
     $routes->post('request/revise', 'Leave::requestRevise');
     $routes->post('request/resubmit', 'Leave::requestResubmit');
 
+    $routes->get('balance', 'Leave::balance');
+    $routes->get('balance/detail/(:segment)', 'Leave::balanceDetail/$1');
+    $routes->post('balance/generate', 'Leave::generateBalance');
+
     //API
     $routes->post('balance/get', 'Leave::getBalance');
+    $routes->get('setting/get', 'Leave::getLeaveSetting');
+    $routes->get('image/(:any)', 'Leave::showAttachment/$1');
 });
 
 //setting
@@ -80,5 +86,7 @@ $routes->group('setting', ['filter' => 'authfilter'], function($routes){
     $routes->post('level/edit', 'Setting::levelUpdate');
     $routes->post('level/delete', 'Setting::levelRemove');
 
-    $routes->get('career-type', 'Setting::careerType');
+    $routes->get('company', 'Setting::company');
+    $routes->get('company/edit/(:segment)', 'Setting::companyEdit/$1');
+    $routes->post('company/edit', 'Setting::companyUpdate');
 });

@@ -116,6 +116,11 @@
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item" href="/leave">Request</a>
+                        <?php
+                            if(!in_array($session['userLevel'], ['STF'])){
+                        ?>
+                        <a class="collapse-item" href="/leave/balance">Generate Balance</a>
+                        <?php } ?>
                     </div>
                 </div>
             </li>
@@ -135,7 +140,7 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item" href="/setting/position">Position</a>
                         <a class="collapse-item" href="/setting/level">level</a>
-                        <a class="collapse-item" href="/setting/career-type">Career Type</a>
+                        <a class="collapse-item" href="/setting/company">Company</a>
                     </div>
                 </div>
             </li>
@@ -356,6 +361,18 @@
                 <!-- End of Topbar -->
 
                 <!-- Begin Page Content -->
+
+                <?php if (session()->getFlashdata('success')): ?>
+                    <p class="text-bg-success w-full">
+                        <?= session()->getFlashdata('success') ?>
+                    </p>
+                <?php endif; ?>
+
+                <?php if (session()->getFlashdata('error')): ?>
+                    <p class="text-bg-danger w-full">
+                        <?= print_r(session()->getFlashdata('error'), true) ?>
+                    </p>
+                <?php endif; ?>
 
                 <?= $this->renderSection('content') ?>
                

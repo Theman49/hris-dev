@@ -37,7 +37,7 @@ class Setting extends BaseController
         if($query){
             echo "<script>alert('success')</script>";
         }else{
-            echo "<script>alert('success')</script>";
+            echo "<script>alert('failed')</script>";
         }
         return $this->position();
     }
@@ -59,7 +59,7 @@ class Setting extends BaseController
         if($query){
             echo "<script>alert('success')</script>";
         }else{
-            echo "<script>alert('success')</script>";
+            echo "<script>alert('failed')</script>";
         }
         return $this->position();
     }
@@ -81,7 +81,7 @@ class Setting extends BaseController
         if($query){
             echo "<script>alert('success')</script>";
         }else{
-            echo "<script>alert('success')</script>";
+            echo "<script>alert('failed')</script>";
         }
         return $this->position();
     }
@@ -113,7 +113,7 @@ class Setting extends BaseController
         if($query){
             echo "<script>alert('success')</script>";
         }else{
-            echo "<script>alert('success')</script>";
+            echo "<script>alert('failed')</script>";
         }
         return $this->level();
     }
@@ -139,7 +139,7 @@ class Setting extends BaseController
         if($query){
             echo "<script>alert('success')</script>";
         }else{
-            echo "<script>alert('success')</script>";
+            echo "<script>alert('failed')</script>";
         }
         return $this->level();
     }
@@ -152,8 +152,41 @@ class Setting extends BaseController
         if($query){
             echo "<script>alert('success')</script>";
         }else{
-            echo "<script>alert('success')</script>";
+            echo "<script>alert('failed')</script>";
         }
         return $this->level();
+    }
+
+    public function company(): string
+    {
+        $db = db_connect();
+        $builder = $db->table('hrmcompparam')->get();
+        $data['query'] = $builder;
+        return view('Setting/company', $data);
+    }
+    public function companyEdit($code): string
+    {
+        $db = db_connect();
+        $query = $db->query("select * from hrmcompparam where param_code='" . $code . "'");
+        $data['query'] = $query;
+        return view('Setting/companyEdit', $data);
+    }
+    public function companyUpdate(): string
+    {
+        $paramCode = $_POST['paramCode'];
+        $newParamValue = $_POST['paramValue'];
+        $db = db_connect();
+        $builder = $db->table('hrmcompparam');
+        $builder->set([
+            'param_value' => $newParamValue,
+        ]);
+        $builder->where('param_code', $paramCode);
+        $query = $builder->update();
+        if($query){
+            echo "<script>alert('success')</script>";
+        }else{
+            echo "<script>alert('failed')</script>";
+        }
+        return $this->company();
     }
 }

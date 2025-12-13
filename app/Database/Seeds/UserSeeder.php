@@ -39,6 +39,7 @@ class UserSeeder extends Seeder
                 'level_code' => 'STF',
                 'career_type' => 'JOIN',
                 'effective_date' => '2025-12-01',
+                'end_date' => '2026-05-01',
             ],
             [
                 'career_code' => 'CAR00002',
@@ -47,6 +48,7 @@ class UserSeeder extends Seeder
                 'level_code' => 'SPV',
                 'career_type' => 'JOIN',
                 'effective_date' => '2025-12-01',
+                'end_date' => '2026-05-01',
             ],
             [
                 'career_code' => 'CAR00003',
@@ -55,6 +57,7 @@ class UserSeeder extends Seeder
                 'level_code' => 'MGR',
                 'career_type' => 'JOIN',
                 'effective_date' => '2025-12-01',
+                'end_date' => '2026-05-01',
             ],
             [
                 'career_code' => 'CAR00004',
@@ -63,6 +66,42 @@ class UserSeeder extends Seeder
                 'level_code' => 'HR',
                 'career_type' => 'JOIN',
                 'effective_date' => '2025-12-01',
+                'end_date' => '2026-05-01',
+            ],
+        ];
+
+        $dataLeaveBalance = [
+            [
+                'leavebalance_id' => 'BAL9201480',
+                'emp_id' => 'EMPSTF',
+                'balance_value' => 12,
+                'start_period' => '2025-12-01',
+                'end_period' => '2026-05-01',
+                'active_status' => 1,
+            ],
+            [
+                'leavebalance_id' => 'BAL9201490',
+                'emp_id' => 'EMPSPV',
+                'balance_value' => 12,
+                'start_period' => '2025-12-01',
+                'end_period' => '2026-05-01',
+                'active_status' => 1,
+            ],
+            [
+                'leavebalance_id' => 'BAL9201491',
+                'emp_id' => 'EMPMGR',
+                'balance_value' => 12,
+                'start_period' => '2025-12-01',
+                'end_period' => '2026-05-01',
+                'active_status' => 1,
+            ],
+            [
+                'leavebalance_id' => 'BAL9201492',
+                'emp_id' => 'HRD',
+                'balance_value' => 12,
+                'start_period' => '2025-12-01',
+                'end_period' => '2026-05-01',
+                'active_status' => 1,
             ],
         ];
 
@@ -108,6 +147,7 @@ class UserSeeder extends Seeder
         // Using Query Builder
         $this->db->table('hrmuser')->insertBatch($dataLogin);
         $this->db->table('hrmcareer')->insertBatch($dataCareer);
+        $this->db->table('hrmleavebalance')->insertBatch($dataLeaveBalance);
         $this->db->table('hrmemployee')->insertBatch($dataEmp);
     }
 }

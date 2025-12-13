@@ -14,8 +14,20 @@
                     if(str_contains(strtolower($tableName), 'career/detail')){
                         $nextPath .= '/' . $empId;
                     }
+
+                    if(str_contains(strtolower($tableName), 'leave/balance/detail')){
+                        ?>
+                            <form method="POST" action="/leave/balance/generate">
+                                <input name="empId" type="hidden" value="<?=$targetEmpId?>">
+                                <button class="btn btn-primary" type="submit" class="m-0 font-weight-bold text-primary" onclick="return confirm('Are you sure want to generete new balance for this employee?')">Generate New Balance</button>
+                            </form>
+                        <?php
+                    }else{
+                        ?>
+                            <a class="m-0 font-weight-bold text-primary" href="/<?=$hrefPage . $nextPath?>">+ Add</a>
+                        <?php
+                    }
                     ?>
-                        <a class="m-0 font-weight-bold text-primary" href="/<?=$hrefPage . $nextPath?>">+ Add</a>
                     <?php
                 }
             ?>
@@ -44,14 +56,19 @@
                                                     if(
                                                        (str_contains(strtolower($tableName), 'setting/position') && $alias == 'pos_code') //for setting position page 
                                                        || (str_contains(strtolower($tableName), 'setting/level') && $alias == 'level_code') //for setting position page 
+                                                       || (str_contains(strtolower($tableName), 'setting/company') && $alias == 'param_code') //for setting company param page 
                                                        // || (str_contains(strtolower($tableName), 'employee') && $alias == 'emp_id') //for employee page 
                                                        || (str_contains(strtolower($tableName), 'recruitment/applicant') && $alias == 'applicant_code') //for applicant page
                                                        || (str_contains(strtolower($tableName), 'recruitment/request') && $alias == 'req_code') //for recruitment request page
                                                        || (str_contains(strtolower($tableName), 'career') && $alias == 'emp_id') //for career transition page
                                                        || (str_contains(strtolower($tableName), 'leave') && $alias == 'leave_code') //for leave request page
+                                                       || ((strtolower($tableName) == 'leave/balance') && $alias == 'emp_id') //for leave request page
                                                     ){
                                                         $hrefPage2 =  '/' . $hrefPage . "/edit/" . $item[$alias];
-                                                        if(str_contains(strtolower($tableName), 'career') && $alias == 'emp_id'){ //for career transition page
+                                                        if(
+                                                            (str_contains(strtolower($tableName), 'career') && $alias == 'emp_id')//for career transition page
+                                                            || (str_contains(strtolower($tableName), 'leave/balance') && $alias == 'emp_id')//for generate balance page
+                                                        ){ 
                                                             $hrefPage2 =  '/' . $hrefPage . "/detail/" . $item[$alias];
                                                         }
                                                         ?>

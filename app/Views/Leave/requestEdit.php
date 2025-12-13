@@ -22,13 +22,13 @@
             ?>
      <div class="container-fluid">
         <?php include APPPATH . 'views/utilities/buttonBack.php' ?>
-        <form id="formApproval" method="POST">
+        <form id="formApproval" method="POST" enctype="multipart/form-data">
         <div class="mb-3">
             <label for="leaveCode" class="form-label">Leave Code</label>
             <input value="<?=$leaveCode?>" name="leaveCode" type="text" class="form-control" id="leaveCode" aria-describedby="emailHelp" readonly>
         </div>
         <div class="d-flex">
-            <div class="mb-3 w-100 mr-3">
+            <div class="mb-3 w-75 mr-3">
                 <label for="reqFor" class="form-label">Request For</label><br>
                 <select name="reqFor" id="reqFor" class="form-control" aria-label="Default select example" required>
                 <?php
@@ -40,9 +40,14 @@
                 ?>
                 </select>
             </div>
-            <div class="mb-3 w-25">
+            <div class="mb-3 mr-3">
                 <label for="leaveBalance" class="form-label">Leave Balance</label>
                 <input value="<?=$data['balance_value']?>" name="leaveBalance" type="number" class="form-control" id="leaveBalance" aria-describedby="emailHelp" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="checkForSick" class="form-label">Sick Request</label>
+                <input name="checkForSick" <?=$data['is_sick_leave'] == 1 ? 'checked' : ''?> type="checkbox" class="form-control" id="checkForSick" aria-describedby="emailHelp" onclick="toggleSick()">
+                <input name="reqForSick" value="<?=$data['is_sick_leave']?>" type="hidden" class="form-control" id="reqForSick" aria-describedby="emailHelp">
             </div>
         </div>
         <div class="d-flex">
@@ -59,6 +64,10 @@
             <label for="reason" class="form-label">Reason</label>
             <textarea name="reason" class="form-control" id="reason" aria-describedby="emailHelp"><?=$data['reason']?></textarea>
         </div>
+        <div class="mb-3" id="boxAttachment" style="<?=($data['is_sick_leave'] == 1 ) ? 'position: relative; left:0px' : 'position: absolute; left:-9999px'?>">
+            <label for="attachment" class="form-label"><span class="text-danger">*</span> Resubmit Attachment (.jpg,.jpeg,.png)</label>
+            <input name="attachment" type="file" class="form-control" accept=".jpg,.jpeg,.png"  id="attachment" aria-describedby="emailHelp" required>
+        </div>
             <div class="mb-3">
                 <label for="reasonRevise" class="form-label">Reason Revise</label>
                 <textarea name="reasonRevise" class="form-control" id="reasonRevise" aria-describedby="emailHelp" readonly><?=$data['reason_revise']?></textarea>
@@ -66,23 +75,187 @@
             <button id="btn-resubmit" type="submit" class="btn btn-primary">Submit to Approver</button>
         </form>
         <script>
-                        const btnResubmit = document.getElementById('btn-resubmit');
-                        btnResubmit.addEventListener('click', function(event){
-                            if(confirm('Are you sure want to resubmit this request?')){
-                                const form = document.getElementById('formApproval');
-                                console.log('approve clicked')
-                                form.setAttribute('action', '/<?=strtolower($tableName)?>/resubmit');
-                                form.submit();
+
+                        function toggleSick(){
+                            const checkForSick = document.getElementById('checkForSick');
+                            const reqForSick = document.getElementById('reqForSick');
+                            const boxAttachment = document.getElementById('boxAttachment');
+
+                            if(checkForSick.checked){
+                                reqForSick.value = 1
+                                boxAttachment.style.position = 'relative'
+                                boxAttachment.style.left = '0'
                             }else{
-                                event.preventDefault();
+                                reqForSick.value = ''
+                                boxAttachment.style.position = 'absolute'
+                                boxAttachment.style.left = '-9999px'
                             }
+                        }
+
+
+                         async function onFirstLoad(){
+                                    const response = await fetch('<?=base_url('/leave/setting/get')?>', {
+                                        method: "GET",
+                                    });
+                                    const result = await response.json()
+                                    console.log('LEAVE SETTING', result)
+
+                                    let isDeduct = 0; //0 is inactive
+                                    let listDayOff = [];
+
+                                    result.forEach((item) => {
+                                        if(item.name == 'leave_deduct'){
+                                            isDeduct = item.value
+                                        }else if(item.name == 'leave_day_off'){
+                                            temp = item.value.split(',')
+                                            listDayOff = temp.map((item) => {
+                                                return parseInt(item)
+                                            })
+                                        }
+                                    })
+
+                                
+                                    // if isDeduct active 
+                                    // Everything except day off based on setting 
+                                    if(isDeduct == 1){
+                                        const validate = dateString => {
+                                            const day = (new Date(dateString)).getDay();
+                                            if (listDayOff.includes(day)) {
+                                                return false;
+                                            }
+                                            return true;
+                                        }
+
+                                        // Sets the value to '' in case of an invalid date
+                                        document.querySelector('#leaveStartDate').onchange = evt => {
+                                            if (!validate(evt.target.value)) {
+                                                evt.target.value = '';
+                                            }
+                                        }
+                                        // Sets the value to '' in case of an invalid date
+                                        document.querySelector('#leaveEndDate').onchange = evt => {
+                                            if (!validate(evt.target.value)) {
+                                                evt.target.value = '';
+                                            }
+                                        }
+                                    }
+
+                                    return {
+                                        'isDeduct' : isDeduct,
+                                        'listDayOff' : listDayOff,
+                                    }
+                        }
+
+                        onFirstLoad();
+                        
+
+
+
+                    
+
+                        const btnSubmit = document.getElementById('btn-resubmit');
+                        btnSubmit.addEventListener('click', async function(event){
+
+                            $checkPassed = true;
+
+                            //check leave end date
+                            const leaveStartDate = document.getElementById('leaveStartDate');
+                            const leaveEndDate = document.getElementById('leaveEndDate');
+                            const leaveBalance = document.getElementById('leaveBalance');
+                            const attachment = document.getElementById('attachment');
+
+                            if(leaveEndDate.value < leaveStartDate.value){
+                                alert("leave end date must be greather than start date");
+                                leaveEndDate.focus();
+                                event.preventDefault();
+                                $checkPassed = false;
+                            }
+
+
+                            const reqForSick = document.getElementById('reqForSick');
+                            // if not req sick, compare req leave with balance 
+                            if(reqForSick.value != 1){
+
+                               
+                                    const date1 = new Date(leaveStartDate.value)
+                                    const date2 = new Date(leaveEndDate.value)
+                                    const diffInMs = date2.getTime() - date1.getTime()
+                                    let diffInDays = (diffInMs / (1000 * 60 * 60 * 24)) + 1
+
+                                    x = await onFirstLoad();
+                                    let isDeduct = x.isDeduct;
+                                    let listDayOff = x.listDayOff;
+
+
+                                    // substract by day off setting when isdeduct == 1
+                                    if(isDeduct == 1){
+                                        diffInDays = 0;
+                                        while(date1 <= date2){
+                                            const day = date1.getDay();
+
+                                            if(!listDayOff.includes(day)){
+                                                diffInDays += 1;
+                                            }
+
+                                            date1.setDate(date1.getDate() + 1);
+                                        }
+
+                                    }
+                                    console.log('diffindays', diffInDays)
+
+                                    if(diffInDays > leaveBalance.value){
+                                        alert(`total request leave (${diffInDays} days) can't greater than balance value`);
+                                        leaveEndDate.focus();
+                                        event.preventDefault();
+                                        $checkPassed = false;
+                                    }
+
+
+                                if(leaveBalance.value == 0){
+                                    alert("this employee doesn't have balance this year");
+                                    leaveBalance.focus();
+                                    event.preventDefault();
+                                    $checkPassed = false;
+                                }
+
+
+                                
+                                
+
+                            }
+
+                            if(reqForSick.value == 1 && attachment.value == ''){
+                                alert("attachment required");
+                                attachment.focus();
+                                event.preventDefault();
+                                $checkPassed = false;
+                            }
+
+                            if($checkPassed == true){
+                                if(confirm('Are you sure want to resubmit this request?')){
+                                    const form = document.getElementById('formApproval');
+                                    console.log('resubmit clicked')
+                                    form.setAttribute('action', '/<?=strtolower($tableName)?>/resubmit');
+                                    form.submit();
+                                }else{
+                                    event.preventDefault();
+                                }
+                            }
+
+
+                        // event.preventDefault();
                         })
+
+
+
+
+
                     </script>
     </div>
 
             <?php
         }else{
-            // NORMAL FORM
+            // View or Approver FORM
             ?>
             <div class="container-fluid">
         <?php include APPPATH . 'views/utilities/buttonBack.php' ?>
@@ -92,7 +265,7 @@
             <input value="<?=$leaveCode?>" name="leaveCode" type="text" class="form-control" id="leaveCode" aria-describedby="emailHelp" readonly>
         </div>
         <div class="d-flex">
-            <div class="mb-3 w-100 mr-3">
+            <div class="mb-3 w-75 mr-3">
                 <input type="hidden" name="reqForHidden" value="<?=$data['req_for']?>"/>
                 <label for="reqFor" class="form-label">Request For</label><br>
                 <select name="reqFor" id="reqFor" class="form-control" aria-label="Default select example" required disabled>
@@ -117,9 +290,14 @@
                 ?>
                 </select>
             </div>
-            <div class="mb-3 w-25">
+            <div class="mb-3 mr-3">
                 <label for="leaveBalance" class="form-label">Leave Balance</label>
                 <input value="<?=$data['balance_value']?>" name="leaveBalance" type="number" class="form-control" id="leaveBalance" aria-describedby="emailHelp" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="checkForSick" class="form-label">Sick Request</label>
+                <input name="checkForSick" <?=$data['is_sick_leave'] == 1 ? 'checked' : ''?> type="checkbox" class="form-control" id="checkForSick" aria-describedby="emailHelp" disabled>
+                <input name="reqForSick" value="<?=$data['is_sick_leave']?>" type="hidden" class="form-control" id="reqForSick" aria-describedby="emailHelp">
             </div>
         </div>
         <div class="d-flex">
@@ -132,6 +310,16 @@
                 <input value="<?=$data['leave_enddate']?>" name="leaveEndDate" min="<?=date('Y-m-d')?>" max="<?=date('Y')?>-12-31" type="date" class="form-control" id="leaveEndDate" aria-describedby="emailHelp" required readonly>
             </div>
         </div>
+        <?php
+            if($data['is_sick_leave'] == 1){
+                ?>
+                    <div class="mb-3">
+                        <p>Attachment</p>
+                        <img class="w-50" src="<?= site_url('leave/image/' . $data['attachment']) ?>" alt="Uploaded Image">
+                    </div>
+                <?php
+            } 
+        ?>
         <div class="mb-3">
             <label for="reason" class="form-label">Reason</label>
             <textarea name="reason" class="form-control" id="reason" aria-describedby="emailHelp" readonly><?=$data['reason']?></textarea>

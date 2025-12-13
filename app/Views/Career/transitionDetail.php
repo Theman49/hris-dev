@@ -9,7 +9,7 @@
     $tableName = 'Career/Detail';
     if(
         ($session['userLevelOrder'] == 1)
-        || ($session['userEmpId'] == $empId)
+        || (($session['userEmpId'] == $empId) && $session['userLevelOrder'] < 4)
     ){
         $hideAdd = true;
     }

@@ -7,6 +7,9 @@
         $backUrl = 'leave';
     ?>
 
+
+
+
     <div class="container-fluid">
         <?php include APPPATH . 'views/utilities/buttonBack.php' ?>
         <form id="formReq" method="POST" enctype="multipart/form-data">
@@ -20,7 +23,7 @@
                 <?php
                     foreach($allEmp as $row){
                         ?>
-                            <option value="<?=$row['emp_id']?>"><?=$row['full_name']?> (<?=$row['pos_name']?>-<?=$row['level_name']?>)</option>
+                            <option <?=(old('reqFor') == $row['emp_id']) ? 'selected' : ''?> value="<?=$row['emp_id']?>"><?=$row['full_name']?> (<?=$row['pos_name']?>-<?=$row['level_name']?>)</option>
                         <?php
                     }
                 ?>
@@ -28,28 +31,28 @@
             </div>
             <div class="mb-3 mr-3">
                 <label for="leaveBalance" class="form-label">Leave Balance</label>
-                <input name="leaveBalance" type="number" class="form-control" id="leaveBalance" aria-describedby="emailHelp" readonly>
+                <input name="leaveBalance" type="number" class="form-control" id="leaveBalance" aria-describedby="emailHelp" readonly value="<?=old('leaveBalance')?>">
             </div>
             <div class="mb-3">
                 <label for="checkForSick" class="form-label">Sick Request</label>
-                <input name="checkForSick" type="checkbox" class="form-control" id="checkForSick" aria-describedby="emailHelp" onclick="toggleSick()">
-                <input name="reqForSick" type="hidden" class="form-control" id="reqForSick" aria-describedby="emailHelp">
+                <input name="checkForSick" type="checkbox" class="form-control" id="checkForSick" aria-describedby="emailHelp" onclick="toggleSick()" <?=(old('reqForSick') == 1) ? 'checked' : ''?>>
+                <input name="reqForSick" type="hidden" class="form-control" id="reqForSick" aria-describedby="emailHelp" value="<?=old('reqForSick')?>">
             </div>
         </div>
 
         <div class="d-flex">
             <div class="mb-3 w-100 mr-3">
                 <label for="leaveStartDate" class="form-label">Leave Start Date</label>
-                <input name="leaveStartDate" type="date" class="form-control" min="<?=date('Y-m-d')?>"  id="leaveStartDate" aria-describedby="emailHelp" required>
+                <input name="leaveStartDate" type="date" class="form-control" min="<?=date('Y-m-d')?>"  id="leaveStartDate" aria-describedby="emailHelp" required value="<?=old('leaveStartDate')?>">
             </div>
             <div class="mb-3 w-100">
                 <label for="leaveEndDate" class="form-label">Leave End Date</label>
-                <input name="leaveEndDate" type="date" class="form-control" min="<?=date('Y-m-d')?>"  id="leaveEndDate" aria-describedby="emailHelp" required>
+                <input name="leaveEndDate" type="date" class="form-control" min="<?=date('Y-m-d')?>"  id="leaveEndDate" aria-describedby="emailHelp" required value="<?=old('leaveEndDate')?>">
             </div>
         </div>
         <div class="mb-3">
             <label for="reason" class="form-label">Reason</label>
-            <textarea name="reason" class="form-control" id="reason" aria-describedby="emailHelp" required></textarea>
+            <textarea name="reason" class="form-control" id="reason" aria-describedby="emailHelp" required><?=old('reason')?></textarea>
         </div>
         <div class="mb-3" id="boxAttachment" style="position: absolute; left:-9999px">
             <label for="attachment" class="form-label"><span class="text-danger">*</span> Attachment (.jpg,.jpeg,.png)</label>

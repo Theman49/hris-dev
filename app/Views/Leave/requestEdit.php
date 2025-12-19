@@ -34,7 +34,7 @@
                 <?php
                     foreach($allEmp as $row){
                         ?>
-                            <option <?=($data['req_for'] == $row['emp_id']) ? 'selected' : ''?> value="<?=$row['emp_id']?>"><?=$row['full_name']?> (<?=$row['pos_name']?>-<?=$row['level_name']?>)</option>
+                            <option <?=($data['req_for'] == $row['emp_id'] || old('reqFor') == $row['emp_id']) ? 'selected' : ''?> value="<?=$row['emp_id']?>"><?=$row['full_name']?> (<?=$row['pos_name']?>-<?=$row['level_name']?>)</option>
                         <?php
                     }
                 ?>
@@ -42,27 +42,27 @@
             </div>
             <div class="mb-3 mr-3">
                 <label for="leaveBalance" class="form-label">Leave Balance</label>
-                <input value="<?=$data['balance_value']?>" name="leaveBalance" type="number" class="form-control" id="leaveBalance" aria-describedby="emailHelp" readonly>
+                <input value="<?=(old('leaveBalance') !== null) ? old('leaveBalance') : $data['balance_value']?>" name="leaveBalance" type="number" class="form-control" id="leaveBalance" aria-describedby="emailHelp" readonly>
             </div>
             <div class="mb-3">
                 <label for="checkForSick" class="form-label">Sick Request</label>
-                <input name="checkForSick" <?=$data['is_sick_leave'] == 1 ? 'checked' : ''?> type="checkbox" class="form-control" id="checkForSick" aria-describedby="emailHelp" onclick="toggleSick()">
-                <input name="reqForSick" value="<?=$data['is_sick_leave']?>" type="hidden" class="form-control" id="reqForSick" aria-describedby="emailHelp">
+                <input name="checkForSick" <?=$data['is_sick_leave'] == 1 || old('reqForSick') == 1 ? 'checked' : ''?> type="checkbox" class="form-control" id="checkForSick" aria-describedby="emailHelp" onclick="toggleSick()">
+                <input name="reqForSick" value="<?=(old('reqForSick') !== null) ? old('reqForSick') : $data['is_sick_leave']?>" type="hidden" class="form-control" id="reqForSick" aria-describedby="emailHelp">
             </div>
         </div>
         <div class="d-flex">
             <div class="mb-3 w-100 mr-3">
                 <label for="leaveStartDate" class="form-label">Leave Start Date</label>
-                <input value="<?=$data['leave_startdate']?>" name="leaveStartDate" min="<?=date('Y-m-d')?>" max="<?=date('Y')?>-12-31" type="date" class="form-control" id="leaveStartDate" aria-describedby="emailHelp" required>
+                <input value="<?=(old('leaveStartDate') !== null) ? old('leaveStartDate') : $data['leave_startdate']?>" name="leaveStartDate" min="<?=date('Y-m-d')?>" max="<?=date('Y')?>-12-31" type="date" class="form-control" id="leaveStartDate" aria-describedby="emailHelp" required>
             </div>
             <div class="mb-3 w-100">
                 <label for="leaveEndDate" class="form-label">Leave End Date</label>
-                <input value="<?=$data['leave_enddate']?>" name="leaveEndDate" min="<?=date('Y-m-d')?>" max="<?=date('Y')?>-12-31" type="date" class="form-control" id="leaveEndDate" aria-describedby="emailHelp" required>
+                <input value="<?=(old('leaveEndDate') !== null) ? old('leaveEndDate') : $data['leave_enddate']?>" name="leaveEndDate" min="<?=date('Y-m-d')?>" max="<?=date('Y')?>-12-31" type="date" class="form-control" id="leaveEndDate" aria-describedby="emailHelp" required>
             </div>
         </div>
         <div class="mb-3">
             <label for="reason" class="form-label">Reason</label>
-            <textarea name="reason" class="form-control" id="reason" aria-describedby="emailHelp"><?=$data['reason']?></textarea>
+            <textarea name="reason" class="form-control" id="reason" aria-describedby="emailHelp"><?=(old('reason') !== null) ? old('reason') : $data['reason']?></textarea>
         </div>
         <div class="mb-3" id="boxAttachment" style="<?=($data['is_sick_leave'] == 1 ) ? 'position: relative; left:0px' : 'position: absolute; left:-9999px'?>">
             <label for="attachment" class="form-label"><span class="text-danger">*</span> Resubmit Attachment (.jpg,.jpeg,.png)</label>

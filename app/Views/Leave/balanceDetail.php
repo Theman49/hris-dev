@@ -8,8 +8,10 @@
     $data =  $query->getResultArray(); 
     $tableName = 'Leave/Balance/Detail';
     if(
-        ($session['userLevelOrder'] == 1)
-        || (($session['userEmpId'] == $targetEmpId) && $session['userLevelOrder'] < 4)
+        // ($session['userLevelOrder'] == 1)
+        // || (($session['userEmpId'] == $targetEmpId) && $session['userLevelOrder'] < 4)
+        ($session['userLevelOrder'] < 4)
+        || (($session['userEmpId'] == $targetEmpId) && $session['userLevelOrder'] == 4)
     ){
         $hideAdd = true;
     }

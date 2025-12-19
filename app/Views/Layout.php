@@ -363,13 +363,13 @@
                 <!-- Begin Page Content -->
 
                 <?php if (session()->getFlashdata('success')): ?>
-                    <p class="text-bg-success w-full">
+                    <p class="bg-success w-full p-2 mx-2">
                         <?= session()->getFlashdata('success') ?>
                     </p>
                 <?php endif; ?>
 
                 <?php if (session()->getFlashdata('error')): ?>
-                    <p class="text-bg-danger w-full">
+                    <p class="text-white bg-danger w-full p-2 mx-2">
                         <?= print_r(session()->getFlashdata('error'), true) ?>
                     </p>
                 <?php endif; ?>

@@ -107,6 +107,16 @@ class Leave extends BaseController
         $newReason = $_POST['reason'];
         $newReqForSick = $_POST['reqForSick'];
 
+
+        // check if req date has exist
+        $checkIsExist = $this->checkIsExist($newReqFor, $newLeaveStartDate, $newLeaveEndDate);
+
+        if($checkIsExist){
+            return redirect()->to('/leave/request/add')
+                    ->withInput()
+                    ->with('error', 'request date has been existed');
+        }
+
         // $date1 = new \DateTime($newLeaveStartDate);
         // $date2 = new \DateTime($newLeaveEndDate);
 
@@ -283,7 +293,7 @@ class Leave extends BaseController
 
     }
 
-    public function requestResubmit(): string
+    public function requestResubmit()
     {
         $session = session()->get('data');
         $db = db_connect();
@@ -296,6 +306,16 @@ class Leave extends BaseController
         $newReqDate = date('Y-m-d');
         $newReason = $_POST['reason'];
         $newReqForSick = $_POST['reqForSick'];
+
+        // check if req date has exist
+        $checkIsExist = $this->checkIsExist($newReqFor, $newLeaveStartDate, $newLeaveEndDate);
+
+        if($checkIsExist){
+            return redirect()->to('/leave/request/edit/' . $leaveCode)
+                    ->withInput()
+                    ->with('error', 'request date has been existed');
+        }
+
 
         $useBalance = $this->countUseBalance($newLeaveStartDate, $newLeaveEndDate);
 
@@ -651,5 +671,24 @@ class Leave extends BaseController
         return $this->response
             ->setHeader('Content-Type', mime_content_type($path))
             ->setBody(file_get_contents($path));
+    }
+
+    public function checkIsExist($empId, $startDate, $endDate){
+        $db = db_connect();
+
+        $builder = $db->table('hrmleave')
+                        ->where('req_for', $empId)
+                        ->where('leave_startdate <=', $endDate)
+                        ->where('leave_enddate >=', $startDate)
+                        ->where('req_status <', 4) // check waiting, partially, finally
+                        ->get();
+        
+        $query = $builder->getResultArray();
+
+        if(count($query) > 0){
+            return true;
+        }
+
+        return false;
     }
 }

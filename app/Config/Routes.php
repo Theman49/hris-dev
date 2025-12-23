@@ -70,6 +70,11 @@ $routes->group('leave', ['filter' => 'authfilter'], function($routes){
     $routes->get('image/(:any)', 'Leave::showAttachment/$1');
 });
 
+$routes->group('profile', ['filter' => 'authfilter'], function($routes){
+    $routes->get('/', 'User::profile');
+    $routes->post('/', 'User::profileUpdate');
+});
+
 //setting
 $routes->group('setting', ['filter' => 'authfilter'], function($routes){
     $routes->get('position', 'Setting::position');
